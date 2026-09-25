@@ -21,8 +21,8 @@ const pkg = require(path.join(root, 'package.json'));
 const version = pkg.version;
 const tag = `v${version}`;
 
-const githubSlug = process.env.GITHUB_REPO_SLUG || 'YOUR_GITHUB_USER/YOUR_REPO';
-const cnbSlug = process.env.CNB_REPO_SLUG || 'cnb.dAjey2JlBMA/storage-inventory';
+const githubSlug = process.env.GITHUB_REPO_SLUG || 'superpigx/storage-inventory';
+const cnbSlug = process.env.CNB_REPO_SLUG || 'crazypigx/storage-inventory';
 
 const manifest = {
   app: 'storage-inventory',
