@@ -22,7 +22,7 @@ const version = pkg.version;
 const tag = `v${version}`;
 
 const githubSlug = process.env.GITHUB_REPO_SLUG || 'YOUR_GITHUB_USER/YOUR_REPO';
-const cnbSlug = process.env.CNB_REPO_SLUG || 'YOUR_CNB_GROUP/YOUR_REPO';
+const cnbSlug = process.env.CNB_REPO_SLUG || 'cnb.dAjey2JlBMA/storage-inventory';
 
 const manifest = {
   app: 'storage-inventory',
