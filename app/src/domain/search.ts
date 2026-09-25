@@ -26,8 +26,14 @@ export interface ItemFilter {
   categories?: string[];
 }
 
+export interface MatchOptions {
+  // 压缩袋的位置路径（如 ['主卧','衣柜A','第2层','袋#3']），加入文本匹配
+  // 这样搜「主卧」能找出主卧里所有衣物，直接服务反向检索诉求
+  bagPath?: string[];
+}
+
 // 反向检索匹配：按文本 + 季节/颜色/类别筛选。空数组 = 不限制。
-export function matchItem(item: Item, f: ItemFilter): boolean {
+export function matchItem(item: Item, f: ItemFilter, opts?: MatchOptions): boolean {
   if (f.seasons && f.seasons.length && (!item.season || !f.seasons.includes(item.season))) return false;
   if (f.colors && f.colors.length && (!item.color || !f.colors.includes(item.color))) return false;
   if (
@@ -38,10 +44,11 @@ export function matchItem(item: Item, f: ItemFilter): boolean {
     return false;
   if (f.text && f.text.trim()) {
     const q = f.text.trim().toLowerCase();
-    const hay = [item.name, item.color, item.season, item.category, ...item.tags]
-      .filter(Boolean)
-      .join(' ')
-      .toLowerCase();
+    const hayParts = [item.name, item.color, item.season, item.category, ...item.tags].filter(
+      Boolean
+    );
+    if (opts?.bagPath?.length) hayParts.push(opts.bagPath.join(' '));
+    const hay = hayParts.join(' ').toLowerCase();
     if (!hay.includes(q)) return false;
   }
   return true;

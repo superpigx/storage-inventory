@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **P4 照片高压缩高保真**：框架无关压缩纯函数 `src/domain/compress.ts`（长边缩放 / WebP 优先 / 目标体积质量二分，附 node 单测 13/13）；`src/infra/photo.ts` 升级 H5 canvas 智能压缩（长边 1600px → WebP → ≤160KB）；`item-edit` 显示压缩结果（格式/体积/质量）
 - **P4 照片存储抽象 `src/infra/photoStore.ts`**：IndexedDB 实现，`exportAll`/`importAll` 为坚果云同步对接点
 - **P4 Capacitor 就绪**：`capacitor.config.ts` + `@capacitor/*` 依赖，本机 `npx cap add android` 出真机 APK；README 补 P4 实战步骤（Capacitor 真机 / 坚果云同步）
+- **P3 检索体验打磨**：文本搜索现可匹配位置名（搜「主卧」即列出主卧所有衣物，强化反向检索）；新增「按位置分组」视图（按 家›房间›柜子›袋 分组并标注每组数量）；排序（最近录入/名称/位置）；已选条件清除条；分组标题计数与改进空状态；检索单测 `scripts/test-search.ts`（11/11 覆盖位置名匹配与筛选逻辑）
 
 ## [0.1.0] - 2026-09-25
 ### Added

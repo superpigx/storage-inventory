@@ -141,4 +141,13 @@ export class Repository {
   locationPathOfBag(bagId: string): string[] {
     return locationPath(bagId, this.getBags(), this.getLocations());
   }
+
+  // 所有压缩袋 -> 位置路径 的映射，供检索时的分组与路径匹配一次性计算
+  locationPathMap(): Record<string, string[]> {
+    const bags = this.getBags();
+    const nodes = this.getLocations();
+    const map: Record<string, string[]> = {};
+    for (const b of bags) map[b.id] = locationPath(b.id, bags, nodes);
+    return map;
+  }
 }

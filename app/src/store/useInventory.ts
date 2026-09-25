@@ -19,10 +19,10 @@ export function useInventory() {
     refresh();
   }, [refresh]);
 
-  const searchItems = useCallback(
-    (f: ItemFilter): Item[] => repo.getItems().filter(i => matchItem(i, f)),
-    []
-  );
+  const searchItems = useCallback((f: ItemFilter): Item[] => {
+    const pathMap = repo.locationPathMap();
+    return repo.getItems().filter(i => matchItem(i, f, { bagPath: pathMap[i.bagId] }));
+  }, []);
 
   return {
     locations,
@@ -73,6 +73,7 @@ export function useInventory() {
       repo.deleteItem(id);
       refresh();
     },
-    locationPathOfBag: (bagId: string) => repo.locationPathOfBag(bagId)
+    locationPathOfBag: (bagId: string) => repo.locationPathOfBag(bagId),
+    locationPathMap: () => repo.locationPathMap()
   };
 }
