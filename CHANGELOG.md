@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
+### Fixed
+- **CI 跨平台构建修复**：lockfile 缺失 Linux/macOS 平台原生包（@swc/core、@tarojs/binding、@tarojs/plugin-doctor），CI 上回退旧版 wasm 报 `unknown field cwd` / `Cannot find module`；将各平台包显式加入 `optionalDependencies`（仅入 lock，Windows 不安装），GitHub Actions 与 CNB 流水线均通过
+- 双源仓库 slug 落地（CNB `crazypigx/storage-inventory` / GitHub `superpigx/storage-inventory`）
 ### Added
 - 腾讯 CNB 双源 CI 配置 `.cnb.yml`（push 冒烟 + tag 发版建 Release 并上传附件）
 - 双源更新清单生成脚本 `app/scripts/gen-manifest.js`（产出含 CNB/GitHub 双下载地址的 `manifest.json`）
