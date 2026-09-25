@@ -71,4 +71,26 @@ app/
 ├─ src/pages/       页面（index = 位置树 CRUD）
 ├─ config/          Taro 编译配置
 └─ README.md
+
+## P4：照片高压缩 + Capacitor 真机 + 坚果云同步（实战步骤）
+
+### 1) 照片高压缩高保真（已完成）
+- 算法在 `src/domain/compress.ts`（框架无关纯函数：缩放 / 格式选择 / 质量二分），由 `src/infra/photo.ts` 在 H5 用 canvas 执行。
+- 策略：最长边缩到 1600px → 优先 WebP（Android 全支持，比 JPEG 小 25-35%）→ 二分质量使单图 ≤160KB。
+- 衣物照片多时，可改用 `src/infra/photoStore.ts`（IndexedDB，不占 localStorage 5MB 配额）。
+
+### 2) Android 真机 APK（需本机）
+```bash
+cd app
+npm install
+npx cap add android     # 生成 android/ 原生工程（仅需一次，需 Android SDK）
+npx cap sync            # 把 dist/ 同步进 android 工程
+cd android && ./gradlew assembleRelease   # 产出 app-release.apk
+```
+首次 `npx cap add android` 需在已装 Android SDK 的机器执行；GitHub/CNB Actions 已配置自动出包（打 tag 触发）。
+
+### 3) 坚果云照片同步（对接点）
+- `src/infra/photoStore.ts` 提供 `exportAll()`（导出全部照片 JSON）与 `importAll(json)`（合并导入）。
+- 手动方案：把导出 JSON 放进坚果云同步目录，换设备后 `importAll` 恢复；多设备冲突按 id 覆盖合并。
+- 端到端自动同步需后续接入坚果云 WebDAV API（需账号），本版提供本地导出/导入作为手动同步基础。
 ```

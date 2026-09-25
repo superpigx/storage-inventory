@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **P2 衣物录入**：`item-edit` 页（拍照/选图 + H5 canvas 压缩为 dataURL、名称/类别/季节/颜色/标签、所属压缩袋选择）；领域层 Item CRUD；照片工具 `src/infra/photo.ts`
 - **P3 反向检索 / 浏览**：`items` 页（文本搜索 + 季节/颜色/类别筛选 chips + 照片网格）；卡片展示位置路径「家 › 房间 › 柜子 › 压缩袋」（Killer Feature）；首页新增「衣物检索」入口
 - 检索纯函数 `src/domain/search.ts`（`matchItem` / `locationPath`，框架无关可迁移）
+- **P4 照片高压缩高保真**：框架无关压缩纯函数 `src/domain/compress.ts`（长边缩放 / WebP 优先 / 目标体积质量二分，附 node 单测 13/13）；`src/infra/photo.ts` 升级 H5 canvas 智能压缩（长边 1600px → WebP → ≤160KB）；`item-edit` 显示压缩结果（格式/体积/质量）
+- **P4 照片存储抽象 `src/infra/photoStore.ts`**：IndexedDB 实现，`exportAll`/`importAll` 为坚果云同步对接点
+- **P4 Capacitor 就绪**：`capacitor.config.ts` + `@capacitor/*` 依赖，本机 `npx cap add android` 出真机 APK；README 补 P4 实战步骤（Capacitor 真机 / 坚果云同步）
 
 ## [0.1.0] - 2026-09-25
 ### Added

@@ -3,7 +3,8 @@ import { View, Text, Button, Input, Image, Picker } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useInventory } from '../../store/useInventory';
 import { CATEGORIES, SEASONS, COLORS } from '../../domain/options';
-import { pickPhoto } from '../../infra/photo';
+import { pickPhoto, type PhotoResult } from '../../infra/photo';
+import { formatBytes } from '../../domain/compress';
 import type { Item } from '../../domain/types';
 import './index.css';
 
@@ -31,6 +32,7 @@ export default function ItemEdit() {
   const [color, setColor] = useState<string>('');
   const [tags, setTags] = useState('');
   const [photo, setPhoto] = useState('');
+  const [photoMeta, setPhotoMeta] = useState<PhotoResult | null>(null);
   const [bagId, setBagId] = useState('');
 
   useEffect(() => {
@@ -53,7 +55,10 @@ export default function ItemEdit() {
 
   const onPick = async () => {
     const data = await pickPhoto();
-    if (data) setPhoto(data);
+    if (data) {
+      setPhoto(data.dataUrl);
+      setPhotoMeta(data);
+    }
   };
 
   const save = () => {
@@ -89,6 +94,10 @@ export default function ItemEdit() {
   const bagIndex = Math.max(0, inv.bags.findIndex(b => b.id === bagId));
   const bagNames = inv.bags.map(b => b.name || '未命名压缩袋');
 
+  const metaText = photoMeta
+    ? `${photoMeta.format === 'image/webp' ? 'WebP' : photoMeta.format === 'image/jpeg' ? 'JPEG' : '原始'} · ${formatBytes(photoMeta.bytes)} · 质量 ${photoMeta.quality}`
+    : photo ? '已存照片' : '';
+
   return (
     <View className='page'>
       <View className='header'>
@@ -102,6 +111,7 @@ export default function ItemEdit() {
           <Text className='ph'>＋ 拍照 / 选图</Text>
         )}
       </View>
+      {metaText && <Text className='meta'>{metaText}</Text>}
 
       <View className='field'>
         <Text className='label'>名称</Text>

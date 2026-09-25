@@ -13,7 +13,10 @@
     "build:weapp": "taro build --type weapp",
     "build:h5": "taro build --type h5",
     "dev:h5": "npm run build:h5 -- --watch",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "cap:add:android": "cap add android",
+    "cap:sync": "cap sync",
+    "test:compress": "node --experimental-strip-types scripts/test-compress.ts"
   },
   "browserslist": [
     "last 3 versions",
@@ -21,6 +24,7 @@
     "ios >= 8"
   ],
   "dependencies": {
+    "@capacitor/core": "^5.7.0",
     "@tarojs/components": "3.6.40",
     "@tarojs/helper": "3.6.40",
     "@tarojs/plugin-framework-react": "3.6.40",
@@ -36,6 +40,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",
+    "@capacitor/android": "^5.7.0",
+    "@capacitor/cli": "^5.7.0",
     "@tarojs/cli": "3.6.40",
     "@tarojs/webpack5-runner": "3.6.40",
     "@types/node": "^20.0.0",
