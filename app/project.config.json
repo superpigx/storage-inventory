@@ -1,0 +1,10 @@
+{
+  "miniprogramRoot": "dist/",
+  "projectname": "storage-inventory",
+  "description": "收纳库存 - 压缩袋衣物管理",
+  "appid": "touristappid",
+  "setting": {
+    "urlCheck": false
+  },
+  "compileType": "miniprogram"
+}

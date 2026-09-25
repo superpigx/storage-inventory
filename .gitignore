@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.weapp/
+.rn_temp/
+.taro/
+.workbuddy/
+*.log
+.DS_Store
+.env
+.env.local
