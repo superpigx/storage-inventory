@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { View, Text, Button, Input } from '@tarojs/components';
+import Taro from '@tarojs/taro';
 import { useInventory } from '../../store/useInventory';
 import type { Bag, LocationNode, LocationType } from '../../domain/types';
 import './index.css';
@@ -25,9 +26,17 @@ export default function Index() {
     <View className='page'>
       <View className='header'>
         <Text className='title'>收纳库存</Text>
-        <Button className='btn-add-root' onClick={() => inv.addLocation('home', '', null)}>
-          + 新家
-        </Button>
+        <View className='header-actions'>
+          <Button
+            className='btn-nav'
+            onClick={() => Taro.navigateTo({ url: '/pages/items/index' })}
+          >
+            衣物检索
+          </Button>
+          <Button className='btn-add-root' onClick={() => inv.addLocation('home', '', null)}>
+            + 新家
+          </Button>
+        </View>
       </View>
       <View className='tree'>
         {roots.length === 0 && (

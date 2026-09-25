@@ -1,4 +1,5 @@
 import type { Bag, Item, KVStore, LocationNode, LocationType } from './types';
+import { locationPath } from './search';
 
 const KEYS = {
   locations: 'si:locations',
@@ -115,8 +116,29 @@ export class Repository {
     return this.getBags().filter(b => b.cabinetId === cabinetId);
   }
 
-  // ---------- Items（占位，P2 启用） ----------
+  // ---------- Items ----------
   getItems(): Item[] {
     return this.read<Item>(KEYS.items);
+  }
+
+  addItem(input: Omit<Item, 'id' | 'createdAt'>): Item {
+    const item: Item = { ...input, id: uid(), createdAt: Date.now() };
+    const list = this.getItems();
+    list.push(item);
+    this.write(KEYS.items, list);
+    return item;
+  }
+
+  updateItem(id: string, patch: Partial<Omit<Item, 'id' | 'createdAt'>>): void {
+    const list = this.getItems().map(i => (i.id === id ? { ...i, ...patch } : i));
+    this.write(KEYS.items, list);
+  }
+
+  deleteItem(id: string): void {
+    this.write(KEYS.items, this.getItems().filter(i => i.id !== id));
+  }
+
+  locationPathOfBag(bagId: string): string[] {
+    return locationPath(bagId, this.getBags(), this.getLocations());
   }
 }

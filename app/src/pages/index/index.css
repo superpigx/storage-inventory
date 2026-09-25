@@ -8,6 +8,19 @@
   justify-content: space-between;
   margin-bottom: 12px;
 }
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+.btn-nav {
+  background: #07c160;
+  color: #fff;
+  font-size: 14px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  margin: 0;
+  line-height: 1.8;
+}
 .title {
   font-size: 20px;
   font-weight: 700;

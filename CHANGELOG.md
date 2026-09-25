@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - 双源更新清单生成脚本 `app/scripts/gen-manifest.js`（产出含 CNB/GitHub 双下载地址的 `manifest.json`）
 - GitHub `release.yml` 增补打包 + 生成 manifest + 上传双源产物
 - 双库备份（GitHub + CNB）git 双 push 配置说明与双源自动更新架构文档
+- **P2 衣物录入**：`item-edit` 页（拍照/选图 + H5 canvas 压缩为 dataURL、名称/类别/季节/颜色/标签、所属压缩袋选择）；领域层 Item CRUD；照片工具 `src/infra/photo.ts`
+- **P3 反向检索 / 浏览**：`items` 页（文本搜索 + 季节/颜色/类别筛选 chips + 照片网格）；卡片展示位置路径「家 › 房间 › 柜子 › 压缩袋」（Killer Feature）；首页新增「衣物检索」入口
+- 检索纯函数 `src/domain/search.ts`（`matchItem` / `locationPath`，框架无关可迁移）
 
 ## [0.1.0] - 2026-09-25
 ### Added
