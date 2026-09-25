@@ -150,4 +150,11 @@ export class Repository {
     for (const b of bags) map[b.id] = locationPath(b.id, bags, nodes);
     return map;
   }
+
+  // 同步合并：整批写回（已由 domain/sync.mergeRemote 合并好）
+  importData(locations: LocationNode[], bags: Bag[], items: Item[]): void {
+    this.write(KEYS.locations, locations);
+    this.write(KEYS.bags, bags);
+    this.write(KEYS.items, items);
+  }
 }

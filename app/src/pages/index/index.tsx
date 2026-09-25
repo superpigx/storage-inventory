@@ -31,6 +31,12 @@ export default function Index() {
           <Text className='subtitle'>家 · 房间 · 柜子 · 压缩袋</Text>
         </View>
         <View className='header-actions'>
+          <View
+            className='icon-btn'
+            onClick={() => Taro.navigateTo({ url: '/pages/settings/index' })}
+          >
+            <Icon name='settings' size={18} />
+          </View>
           <Button
             className='btn btn-ghost'
             onClick={() => Taro.navigateTo({ url: '/pages/items/index' })}
