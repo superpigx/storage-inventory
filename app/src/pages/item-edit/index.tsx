@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import { View, Text, Button, Input, Image, Picker } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useInventory } from '../../store/useInventory';
+import Icon from '../../components/Icon';
 import { CATEGORIES, SEASONS, COLORS } from '../../domain/options';
 import { pickPhoto, type PhotoResult } from '../../infra/photo';
 import { formatBytes } from '../../domain/compress';
 import type { Item } from '../../domain/types';
 import './index.css';
 
-// 单选 chip：点已选中的再次点击即取消
 function SingleChip({
   label,
   active,
@@ -18,7 +18,11 @@ function SingleChip({
   active: boolean;
   onClick: () => void;
 }) {
-  return <Text className={'chip' + (active ? ' on' : '')} onClick={onClick}>{label}</Text>;
+  return (
+    <Text className={'chip' + (active ? ' on' : '')} onClick={onClick}>
+      {label}
+    </Text>
+  );
 }
 
 export default function ItemEdit() {
@@ -96,7 +100,9 @@ export default function ItemEdit() {
 
   const metaText = photoMeta
     ? `${photoMeta.format === 'image/webp' ? 'WebP' : photoMeta.format === 'image/jpeg' ? 'JPEG' : '原始'} · ${formatBytes(photoMeta.bytes)} · 质量 ${photoMeta.quality}`
-    : photo ? '已存照片' : '';
+    : photo
+      ? '已存照片'
+      : '';
 
   return (
     <View className='page'>
@@ -104,89 +110,109 @@ export default function ItemEdit() {
         <Text className='title'>{editing ? '编辑衣物' : '录入衣物'}</Text>
       </View>
 
-      <View className='photo' onClick={onPick}>
+      <View className='photo-zone' onClick={onPick}>
         {photo ? (
           <Image className='preview' src={photo} mode='aspectFill' />
         ) : (
-          <Text className='ph'>＋ 拍照 / 选图</Text>
+          <View className='photo-ph'>
+            <Icon name='camera' size={30} />
+            <Text className='photo-ph-text'>拍照 / 选图</Text>
+          </View>
         )}
       </View>
       {metaText && <Text className='meta'>{metaText}</Text>}
 
-      <View className='field'>
-        <Text className='label'>名称</Text>
-        <Input
-          className='input'
-          value={name}
-          placeholder='如：蓝色毛衣'
-          onInput={(e: any) => setName(e.detail.value)}
-        />
-      </View>
-
-      <View className='field col'>
-        <Text className='label'>类别</Text>
-        <View className='chips'>
-          {CATEGORIES.map(c => (
-            <SingleChip
-              key={c}
-              label={c}
-              active={category === c}
-              onClick={() => setCategory(category === c ? CATEGORIES[0] : c)}
-            />
-          ))}
+      <View className='form card'>
+        <View className='field'>
+          <Text className='field-label'>名称</Text>
+          <Input
+            className='input'
+            value={name}
+            placeholder='如：蓝色毛衣'
+            onInput={(e: any) => setName(e.detail.value)}
+          />
         </View>
-      </View>
 
-      <View className='field col'>
-        <Text className='label'>季节</Text>
-        <View className='chips'>
-          {SEASONS.map(s => (
-            <SingleChip key={s} label={s} active={season === s} onClick={() => setSeason(season === s ? '' : s)} />
-          ))}
+        <View className='field'>
+          <Text className='field-label'>类别</Text>
+          <View className='chips'>
+            {CATEGORIES.map(c => (
+              <SingleChip
+                key={c}
+                label={c}
+                active={category === c}
+                onClick={() => setCategory(category === c ? CATEGORIES[0] : c)}
+              />
+            ))}
+          </View>
         </View>
-      </View>
 
-      <View className='field col'>
-        <Text className='label'>颜色</Text>
-        <View className='chips'>
-          {COLORS.map(c => (
-            <SingleChip key={c} label={c} active={color === c} onClick={() => setColor(color === c ? '' : c)} />
-          ))}
+        <View className='field'>
+          <Text className='field-label'>季节</Text>
+          <View className='chips'>
+            {SEASONS.map(s => (
+              <SingleChip
+                key={s}
+                label={s}
+                active={season === s}
+                onClick={() => setSeason(season === s ? '' : s)}
+              />
+            ))}
+          </View>
         </View>
-      </View>
 
-      <View className='field'>
-        <Text className='label'>标签</Text>
-        <Input
-          className='input'
-          value={tags}
-          placeholder='逗号分隔，如：厚,户外'
-          onInput={(e: any) => setTags(e.detail.value)}
-        />
-      </View>
+        <View className='field'>
+          <Text className='field-label'>颜色</Text>
+          <View className='chips'>
+            {COLORS.map(c => (
+              <SingleChip
+                key={c}
+                label={c}
+                active={color === c}
+                onClick={() => setColor(color === c ? '' : c)}
+              />
+            ))}
+          </View>
+        </View>
 
-      <View className='field'>
-        <Text className='label'>所在袋</Text>
-        {inv.bags.length ? (
-          <Picker
-            mode='selector'
-            range={bagNames}
-            value={bagIndex}
-            onChange={(e: any) => setBagId(inv.bags[e.detail.value].id)}
-          >
-            <View className='picker'>{inv.bags[bagIndex]?.name || '请选择'}</View>
-          </Picker>
-        ) : (
-          <Text className='warn'>还没有压缩袋，请先到首页添加</Text>
-        )}
+        <View className='field'>
+          <Text className='field-label'>标签</Text>
+          <Input
+            className='input'
+            value={tags}
+            placeholder='逗号分隔，如：厚,户外'
+            onInput={(e: any) => setTags(e.detail.value)}
+          />
+        </View>
+
+        <View className='field'>
+          <Text className='field-label'>所在袋</Text>
+          {inv.bags.length ? (
+            <Picker
+              mode='selector'
+              range={bagNames}
+              value={bagIndex}
+              onChange={(e: any) => setBagId(inv.bags[e.detail.value].id)}
+            >
+              <View className='picker'>
+                <Text>{inv.bags[bagIndex]?.name || '请选择'}</Text>
+                <Icon name='chevron-right' size={16} color='var(--text-3)' />
+              </View>
+            </Picker>
+          ) : (
+            <Text className='warn'>还没有压缩袋，请先到首页添加</Text>
+          )}
+        </View>
       </View>
 
       <View className='actions'>
-        <Button className='btn-save' onClick={save}>
-          保存
+        <Button className='btn btn-primary btn-block' onClick={save}>
+          <Icon name='check' size={16} color='#fff' />
+          {editing ? '保存修改' : '保存衣物'}
         </Button>
         {editing && (
-          <Button className='btn-del' onClick={remove}>
+          <Button className='btn btn-danger btn-block' onClick={remove}>
+            <Icon name='trash' size={16} />
             删除
           </Button>
         )}

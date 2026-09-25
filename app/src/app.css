@@ -1,4 +1,268 @@
+:root,
 page {
-  background: #f5f6f8;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* ---- 调色板：单色强调、低饱和，避免 AI 蓝紫 ---- */
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --surface-2: #f0f2f5;
+  --text: #1a1d1f;
+  --text-2: #6b7280;
+  --text-3: #9aa1ab;
+  --border: #e7e9ee;
+  --accent: #1f9d6b;
+  --accent-strong: #178a5c;
+  --accent-weak: #e7f5ef;
+  --danger: #e5484d;
+  --danger-weak: #fdecec;
+
+  /* ---- 圆角 / 阴影 / 缓动 ---- */
+  --r-lg: 18px;
+  --r-md: 14px;
+  --r-sm: 10px;
+  --r-pill: 999px;
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+  --shadow-md: 0 6px 20px rgba(16, 24, 40, 0.07), 0 1px 3px rgba(16, 24, 40, 0.04);
+  --shadow-lg: 0 14px 40px rgba(16, 24, 40, 0.12);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei',
+    'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+view,
+text,
+input,
+button,
+image {
+  box-sizing: border-box;
+}
+
+/* ---------- 页面容器：桌面预览时模拟手机列宽 ---------- */
+.page {
+  max-width: 600px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  padding: 20px 16px calc(28px + env(safe-area-inset-bottom));
+  background: var(--bg);
+}
+
+/* ---------- 顶部标题栏 ---------- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.subtitle {
+  display: block;
+  font-size: 13px;
+  color: var(--text-3);
+  font-weight: 400;
+  margin-top: 2px;
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* ---------- 按钮 ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 14px;
+  line-height: 1.4;
+  padding: 9px 16px;
+  border-radius: var(--r-pill);
+  border: none;
+  background: var(--surface-2);
+  color: var(--text);
+  transition: transform 0.15s var(--ease), background 0.15s var(--ease),
+    box-shadow 0.15s var(--ease);
+  cursor: pointer;
+}
+.btn:active {
+  transform: scale(0.96);
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+.btn-primary:active {
+  background: var(--accent-strong);
+}
+.btn-ghost {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+}
+.btn-danger {
+  background: var(--danger-weak);
+  color: var(--danger);
+}
+.btn-block {
+  width: 100%;
+}
+.btn-sm {
+  font-size: 12px;
+  padding: 5px 11px;
+}
+
+/* 图标按钮 */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text-2);
+  transition: transform 0.15s var(--ease), background 0.15s var(--ease),
+    color 0.15s var(--ease);
+  cursor: pointer;
+}
+.icon-btn:active {
+  transform: scale(0.92);
+  background: var(--border);
+}
+.icon-btn.danger {
+  color: var(--danger);
+  background: var(--danger-weak);
+}
+.icon-btn.accent {
+  color: var(--accent);
+  background: var(--accent-weak);
+}
+
+/* ---------- 标签 chip ---------- */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  font-size: 13px;
+  padding: 7px 14px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  transition: transform 0.15s var(--ease), background 0.15s var(--ease),
+    color 0.15s var(--ease), border-color 0.15s var(--ease);
+  cursor: pointer;
+}
+.chip:active {
+  transform: scale(0.95);
+}
+.chip.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ---------- 表单字段 ---------- */
+.field {
+  margin-bottom: 16px;
+}
+.field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+  margin-bottom: 8px;
+}
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 11px 14px;
+  font-size: 15px;
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+}
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-weak);
+}
+
+/* ---------- 卡片 ---------- */
+.card {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---------- 空状态 ---------- */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 56px 24px;
+  color: var(--text-3);
+  font-size: 14px;
+  line-height: 1.6;
+  gap: 12px;
+}
+.empty-ico {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.empty-cta {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--accent);
+  background: var(--accent-weak);
+  padding: 8px 16px;
+  border-radius: var(--r-pill);
+}
+
+/* ---------- 入场微动效（仅 GPU 属性） ---------- */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.anim-fade-up {
+  animation: fadeUp 0.42s var(--ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

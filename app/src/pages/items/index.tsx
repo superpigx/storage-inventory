@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { View, Text, Button, Input, Image } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useInventory } from '../../store/useInventory';
+import Icon from '../../components/Icon';
 import { CATEGORIES, SEASONS, COLORS } from '../../domain/options';
 import type { ItemFilter } from '../../domain/search';
 import type { Item } from '../../domain/types';
@@ -10,7 +11,7 @@ import './index.css';
 type SortKey = 'recent' | 'name' | 'location';
 
 const SORTS: { key: SortKey; label: string }[] = [
-  { key: 'recent', label: '最近录入' },
+  { key: 'recent', label: '最近' },
   { key: 'name', label: '名称' },
   { key: 'location', label: '位置' }
 ];
@@ -66,39 +67,69 @@ export default function Items() {
   const openEdit = (id?: string) =>
     Taro.navigateTo({ url: '/pages/item-edit/index' + (id ? '?id=' + id : '') });
 
-  const renderCard = (it: Item) => (
-    <View className='card' key={it.id} onClick={() => openEdit(it.id)}>
+  const renderCard = (it: Item, i: number) => (
+    <View
+      className='card anim-fade-up'
+      key={it.id}
+      style={{ animationDelay: i * 35 + 'ms' } as any}
+      onClick={() => openEdit(it.id)}
+    >
       {it.photoPath ? (
         <Image className='thumb' src={it.photoPath} mode='aspectFill' />
       ) : (
-        <View className='thumb ph'>📭</View>
+        <View className='thumb ph'>
+          <Icon name='inbox' size={30} />
+        </View>
       )}
       <Text className='name'>{it.name || '未命名'}</Text>
-      <Text className='path'>{pathMap[it.bagId]?.length ? pathMap[it.bagId].join(' › ') : '未归位'}</Text>
+      <Text className='path'>
+        <Icon name='pin' size={11} color='var(--text-3)' />
+        {pathMap[it.bagId]?.length ? ' ' + pathMap[it.bagId].join(' › ') : ' 未归位'}
+      </Text>
     </View>
   );
 
   return (
     <View className='page'>
       <View className='header'>
-        <Text className='title'>衣物检索</Text>
-        <Button className='btn-add' onClick={() => openEdit()}>
-          ＋录入
+        <View>
+          <Text className='title'>衣物检索</Text>
+          <Text className='subtitle'>搜名称 / 颜色 / 季节 / 标签 / 位置</Text>
+        </View>
+        <Button className='btn btn-primary' onClick={() => openEdit()}>
+          <Icon name='plus' size={16} />
+          录入
         </Button>
       </View>
 
-      <Input
-        className='search'
-        placeholder='搜 名称 / 颜色 / 季节 / 标签 / 位置…'
-        value={text}
-        onInput={(e: any) => setText(e.detail.value)}
-      />
+      <View className='search-wrap'>
+        <View className='search-ico'>
+          <Icon name='search' size={18} color='var(--text-3)' />
+        </View>
+        <Input
+          className='search'
+          placeholder='搜 名称 / 颜色 / 季节 / 标签 / 位置…'
+          value={text}
+          onInput={(e: any) => setText(e.detail.value)}
+        />
+        {text.trim() && (
+          <View className='search-clear' onClick={() => setText('')}>
+            <Icon name='x' size={14} />
+          </View>
+        )}
+      </View>
 
       <View className='filter-row'>
         <Text className='filter-label'>季节</Text>
         <View className='chips'>
           {SEASONS.map(s => (
-            <Chip key={s} label={s} active={seasons.includes(s)} onClick={() => toggle(seasons, setSeasons, s)} />
+            <Text
+              key={s}
+              className={'chip' + (seasons.includes(s) ? ' on' : '')}
+              onClick={() => toggle(seasons, setSeasons, s)}
+            >
+              {s}
+            </Text>
           ))}
         </View>
       </View>
@@ -106,7 +137,13 @@ export default function Items() {
         <Text className='filter-label'>颜色</Text>
         <View className='chips'>
           {COLORS.map(c => (
-            <Chip key={c} label={c} active={colors.includes(c)} onClick={() => toggle(colors, setColors, c)} />
+            <Text
+              key={c}
+              className={'chip' + (colors.includes(c) ? ' on' : '')}
+              onClick={() => toggle(colors, setColors, c)}
+            >
+              {c}
+            </Text>
           ))}
         </View>
       </View>
@@ -114,12 +151,13 @@ export default function Items() {
         <Text className='filter-label'>类别</Text>
         <View className='chips'>
           {CATEGORIES.map(c => (
-            <Chip
+            <Text
               key={c}
-              label={c}
-              active={categories.includes(c)}
+              className={'chip' + (categories.includes(c) ? ' on' : '')}
               onClick={() => toggle(categories, setCategories, c)}
-            />
+            >
+              {c}
+            </Text>
           ))}
         </View>
       </View>
@@ -127,7 +165,9 @@ export default function Items() {
       {activeCount > 0 && (
         <View className='active-bar' onClick={clearAll}>
           <Text className='active-text'>已选 {activeCount} 个条件</Text>
-          <Text className='active-clear'>清除筛选 ✕</Text>
+          <Text className='active-clear'>
+            <Icon name='x' size={13} /> 清除
+          </Text>
         </View>
       )}
 
@@ -143,8 +183,12 @@ export default function Items() {
             </Text>
           ))}
         </View>
-        <Text className={'group-toggle' + (groupBy ? ' on' : '')} onClick={() => setGroupBy(v => !v)}>
-          {groupBy ? '📂 按位置分组' : '▦ 平铺'}
+        <Text
+          className={'group-toggle' + (groupBy ? ' on' : '')}
+          onClick={() => setGroupBy(v => !v)}
+        >
+          <Icon name={groupBy ? 'layers' : 'grid'} size={14} />
+          {groupBy ? '按位置' : '平铺'}
         </Text>
       </View>
 
@@ -152,16 +196,24 @@ export default function Items() {
 
       {inv.items.length === 0 && (
         <View className='empty'>
-          <Text className='empty-emoji'>🧺</Text>
-          <Text className='empty-text'>还没有衣物，点「＋录入」添加第一件</Text>
+          <View className='empty-ico'>
+            <Icon name='inbox' size={26} />
+          </View>
+          <Text>还没有衣物，点右上角「录入」添加第一件</Text>
         </View>
       )}
 
       {inv.items.length > 0 && results.length === 0 && (
         <View className='empty'>
-          <Text className='empty-emoji'>🔍</Text>
-          <Text className='empty-text'>没有匹配的衣物</Text>
-          {activeCount > 0 && <Text className='empty-clear' onClick={clearAll}>点此清除筛选</Text>}
+          <View className='empty-ico'>
+            <Icon name='search' size={26} />
+          </View>
+          <Text>没有匹配的衣物</Text>
+          {activeCount > 0 && (
+            <Text className='empty-cta' onClick={clearAll}>
+              清除筛选条件
+            </Text>
+          )}
         </View>
       )}
 
@@ -170,24 +222,21 @@ export default function Items() {
           {groups.map(([key, items]) => (
             <View className='group' key={key}>
               <View className='group-head'>
-                <Text className='group-path'>📍 {key}</Text>
-                <Text className='group-count'>{items.length} 件</Text>
+                <Text className='group-path'>
+                  <Icon name='pin' size={14} color='var(--accent)' />
+                  <Text className='group-path-text'>{key}</Text>
+                </Text>
+                <Text className='group-count'>{items.length}</Text>
               </View>
-              <View className='grid'>{items.map(renderCard)}</View>
+              <View className='grid'>{items.map((it, i) => renderCard(it, i))}</View>
             </View>
           ))}
         </View>
       )}
 
-      {results.length > 0 && !groupBy && <View className='grid'>{sorted.map(renderCard)}</View>}
+      {results.length > 0 && !groupBy && (
+        <View className='grid'>{sorted.map((it, i) => renderCard(it, i))}</View>
+      )}
     </View>
-  );
-}
-
-function Chip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
-  return (
-    <Text className={'chip' + (active ? ' on' : '')} onClick={onClick}>
-      {label}
-    </Text>
   );
 }

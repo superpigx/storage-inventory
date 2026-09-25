@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **P4 照片存储抽象 `src/infra/photoStore.ts`**：IndexedDB 实现，`exportAll`/`importAll` 为坚果云同步对接点
 - **P4 Capacitor 就绪**：`capacitor.config.ts` + `@capacitor/*` 依赖，本机 `npx cap add android` 出真机 APK；README 补 P4 实战步骤（Capacitor 真机 / 坚果云同步）
 - **P3 检索体验打磨**：文本搜索现可匹配位置名（搜「主卧」即列出主卧所有衣物，强化反向检索）；新增「按位置分组」视图（按 家›房间›柜子›袋 分组并标注每组数量）；排序（最近录入/名称/位置）；已选条件清除条；分组标题计数与改进空状态；检索单测 `scripts/test-search.ts`（11/11 覆盖位置名匹配与筛选逻辑）
+- **UI 全面重设计（设计系统）**：`app.css` 建立设计令牌（CSS 变量：调色板/圆角/阴影/缓动）、共享组件类（btn/chip/field/card/icon-btn/empty）、GPU 友好微动效（fadeUp 入场 + :active 按压缩放）与 `prefers-reduced-motion` 降级；新增 `src/components/Icon.tsx` 内联 SVG 图标集（21 个，替代全部 emoji）；三页（位置树/检索/录入）统一套用，桌面预览模拟 600px 手机列宽
 
 ## [0.1.0] - 2026-09-25
 ### Added

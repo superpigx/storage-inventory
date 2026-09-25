@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { View, Text, Button, Input } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useInventory } from '../../store/useInventory';
+import Icon from '../../components/Icon';
 import type { Bag, LocationNode, LocationType } from '../../domain/types';
 import './index.css';
 
-const TYPE_LABEL: Record<LocationType, string> = {
-  home: '家',
-  room: '房间',
-  cabinet: '柜子'
+const TYPE_META: Record<LocationType, { label: string; icon: any }> = {
+  home: { label: '家', icon: 'home' },
+  room: { label: '房间', icon: 'room' },
+  cabinet: { label: '柜子', icon: 'cabinet' }
 };
 
 // 子节点类型：家→房间→柜子；柜子下挂载压缩袋
@@ -25,25 +26,36 @@ export default function Index() {
   return (
     <View className='page'>
       <View className='header'>
-        <Text className='title'>收纳库存</Text>
+        <View>
+          <Text className='title'>收纳库存</Text>
+          <Text className='subtitle'>家 · 房间 · 柜子 · 压缩袋</Text>
+        </View>
         <View className='header-actions'>
           <Button
-            className='btn-nav'
+            className='btn btn-ghost'
             onClick={() => Taro.navigateTo({ url: '/pages/items/index' })}
           >
-            衣物检索
+            <Icon name='search' size={16} />
+            检索
           </Button>
-          <Button className='btn-add-root' onClick={() => inv.addLocation('home', '', null)}>
-            + 新家
+          <Button className='btn btn-primary' onClick={() => inv.addLocation('home', '', null)}>
+            <Icon name='plus' size={16} />
+            新家
           </Button>
         </View>
       </View>
+
       <View className='tree'>
         {roots.length === 0 && (
-          <Text className='empty'>还没有家，点上方「+ 新家」开始</Text>
+          <View className='empty'>
+            <View className='empty-ico'>
+              <Icon name='home' size={26} />
+            </View>
+            <Text>还没有家，点右上角「新家」开始整理</Text>
+          </View>
         )}
-        {roots.map(n => (
-          <Node key={n.id} node={n} inv={inv} />
+        {roots.map((n, i) => (
+          <Node key={n.id} node={n} inv={inv} depth={0} index={i} />
         ))}
       </View>
     </View>
@@ -61,76 +73,108 @@ interface Inv {
   deleteBag: (id: string) => void;
 }
 
-function Node({ node, inv }: { node: LocationNode; inv: Inv }) {
-  const [open, setOpen] = useState(false);
+function Node({
+  node,
+  inv,
+  depth,
+  index
+}: {
+  node: LocationNode;
+  inv: Inv;
+  depth: number;
+  index: number;
+}) {
+  const [open, setOpen] = useState(depth < 1);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(node.name);
 
+  const meta = TYPE_META[node.type];
   const childType = CHILD_TYPE[node.type];
   const children = inv.locations.filter(n => n.parentId === node.id);
   const bags = node.type === 'cabinet' ? inv.bags.filter(b => b.cabinetId === node.id) : [];
+  const hasChildren = children.length > 0 || bags.length > 0;
 
   const commitEdit = () => {
     inv.updateLocation(node.id, draft);
     setEditing(false);
   };
 
+  const onDelete = () => {
+    if (typeof confirm === 'function' && confirm('删除「' + node.name + '」及其下级？')) {
+      inv.deleteLocation(node.id);
+    }
+  };
+
   return (
     <View className='node'>
-      <View className='node-row'>
-        <Text className='toggle' onClick={() => setOpen(o => !o)}>
-          {open ? '▾' : '▸'}
+      <View
+        className={'node-row card anim-fade-up'}
+        style={{ animationDelay: index * 40 + 'ms', marginLeft: depth * 14 + 'px' } as any}
+      >
+        <Text
+          className={'chevron' + (hasChildren ? '' : ' disabled')}
+          onClick={() => hasChildren && setOpen(o => !o)}
+        >
+          {hasChildren && <Icon name={open ? 'chevron-down' : 'chevron-right'} size={18} />}
         </Text>
+        <View className='node-ico'>
+          <Icon name={meta.icon} size={18} />
+        </View>
         {editing ? (
           <Input
             className='edit'
             value={draft}
+            focus
             onInput={(e: any) => setDraft(e.detail.value)}
             onBlur={commitEdit}
+            onConfirm={commitEdit}
           />
         ) : (
           <Text className='name' onClick={() => setEditing(true)}>
             {node.name}
           </Text>
         )}
-        <Text className='type'>{TYPE_LABEL[node.type]}</Text>
-        <Button className='btn-sm' onClick={() => inv.addLocation(childType, '', node.id)}>
-          +子
-        </Button>
-        {node.type === 'cabinet' && (
-          <Button className='btn-sm' onClick={() => inv.addBag('', node.id)}>
-            +袋
-          </Button>
-        )}
-        <Button
-          className='btn-sm danger'
-          onClick={() => {
-            if (typeof confirm === 'function' && confirm('删除 ' + node.name + ' 及其下级？')) {
-              inv.deleteLocation(node.id);
-            }
-          }}
-        >
-          删
-        </Button>
-      </View>
-      {open && (
-        <View className='children'>
-          {children.map(c => (
-            <Node key={c.id} node={c} inv={inv} />
-          ))}
-          {bags.map(b => (
-            <BagRow key={b.id} bag={b} inv={inv} />
-          ))}
-          {children.length === 0 && bags.length === 0 && (
-            <Text className='empty'>{node.type === 'cabinet' ? '暂无压缩袋' : '暂无下级'}</Text>
+        <Text className='type-badge'>{meta.label}</Text>
+        <View className='node-actions'>
+          <View className='icon-btn accent' onClick={() => inv.addLocation(childType, '', node.id)}>
+            <Icon name='plus' size={16} />
+          </View>
+          {node.type === 'cabinet' && (
+            <View className='icon-btn' onClick={() => inv.addBag('', node.id)}>
+              <Icon name='bag' size={16} />
+            </View>
           )}
+          <View className='icon-btn danger' onClick={onDelete}>
+            <Icon name='trash' size={16} />
+          </View>
+        </View>
+      </View>
+
+      {open && hasChildren && (
+        <View className='children'>
+          {children.map((c, i) => (
+            <Node key={c.id} node={c} inv={inv} depth={depth + 1} index={i} />
+          ))}
+          {bags.map((b, i) => (
+            <BagRow key={b.id} bag={b} inv={inv} depth={depth + 1} index={i} />
+          ))}
         </View>
       )}
     </View>
   );
 }
 
-function BagRow({ bag, inv }: { bag: Bag; inv: Inv }) {
+function BagRow({
+  bag,
+  inv,
+  depth,
+  index
+}: {
+  bag: Bag;
+  inv: Inv;
+  depth: number;
+  index: number;
+}) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(bag.name);
 
@@ -140,25 +184,42 @@ function BagRow({ bag, inv }: { bag: Bag; inv: Inv }) {
   };
 
   return (
-    <View className='node bag'>
+    <View
+      className='node bag card anim-fade-up'
+      style={{ animationDelay: index * 40 + 'ms', marginLeft: depth * 14 + 'px' } as any}
+    >
       <View className='node-row'>
-        <Text className='toggle'>📦</Text>
+        <Text className='chevron disabled' />
+        <View className='node-ico bag-ico'>
+          <Icon name='bag' size={18} />
+        </View>
         {editing ? (
           <Input
             className='edit'
             value={draft}
+            focus
             onInput={(e: any) => setDraft(e.detail.value)}
             onBlur={commit}
+            onConfirm={commit}
           />
         ) : (
           <Text className='name' onClick={() => setEditing(true)}>
             {bag.name}
           </Text>
         )}
-        <Text className='type'>压缩袋</Text>
-        <Button className='btn-sm danger' onClick={() => inv.deleteBag(bag.id)}>
-          删
-        </Button>
+        <Text className='type-badge soft'>压缩袋</Text>
+        <View className='node-actions'>
+          <View
+            className='icon-btn danger'
+            onClick={() => {
+              if (typeof confirm === 'function' && confirm('删除「' + bag.name + '」？')) {
+                inv.deleteBag(bag.id);
+              }
+            }}
+          >
+            <Icon name='trash' size={16} />
+          </View>
+        </View>
       </View>
     </View>
   );
