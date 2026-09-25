@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
+### Added
+- 腾讯 CNB 双源 CI 配置 `.cnb.yml`（push 冒烟 + tag 发版建 Release 并上传附件）
+- 双源更新清单生成脚本 `app/scripts/gen-manifest.js`（产出含 CNB/GitHub 双下载地址的 `manifest.json`）
+- GitHub `release.yml` 增补打包 + 生成 manifest + 上传双源产物
+- 双库备份（GitHub + CNB）git 双 push 配置说明与双源自动更新架构文档
 
 ## [0.1.0] - 2026-09-25
 ### Added

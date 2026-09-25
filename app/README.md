@@ -27,10 +27,40 @@ npm run build:h5    # 产物输出到 app/dist
 - 自动更新：Android 端接 **Capacitor + Capgo**，以 `package.json` 的 `version` 为基线；
   CI 构建新包推送后，App 启动自动拉取热更新（用户无感）
 
-## CI / 发版（GitHub）
+## CI / 发版（GitHub + 腾讯 CNB 双源）
 - `.github/workflows/ci.yml`：push 到 main → 安装依赖 + 构建 H5（冒烟测试）
-- `.github/workflows/release.yml`：打 `v*` tag → 构建并上传 H5 产物；Android APK 步骤已预留
+- `.github/workflows/release.yml`：打 `v*` tag → 构建 H5 + 打包 + 生成 `manifest.json`（双源下载地址）并上传产物；Android APK 步骤已预留
   （需先在 `app/` 执行 `npx cap add android` 接入 Capacitor 平台目录）
+- `.cnb.yml`（腾讯云原生构建）：与 GitHub 双源镜像。push 到 main 做冒烟；打 tag 自动建 CNB Release 并上传 `dist-h5.tar.gz` + `manifest.json`
+- 两平台的 tag 发版产物一致，互为备份与 fallback
+
+## 双库备份与双源自动更新
+代码仓库**双库热备**：GitHub（主/备份）+ 腾讯 CNB（国内快、免 GFW，作为主构建分发源）。
+一条 `git push` 同时推两家，避免单点丢失：
+
+```bash
+# 1) 先各自添加为独立 remote（便于区分）
+git remote add github <你的-github-仓库.git>
+git remote add cnb    <你的-cnb-仓库.git>
+
+# 2) 或：单 origin 配双 push URL，一次推送两家（推荐）
+git remote set-url origin <github-仓库.git>
+git remote set-url --add --push origin <github-仓库.git>
+git remote set-url --add --push origin <cnb-仓库.git>
+git push origin --tags        # 一次性推送到 GitHub + CNB
+```
+
+**双源自动更新**架构：
+- CI 在打 tag 时生成 `app/dist/manifest.json`，内含 `version` 与 `androidApk`/`h5Bundle` 在
+  **CNB 与 GitHub 两份下载地址**，以及 `sources: ["cnb","github"]` 优先级。
+- App 端更新服务（P4 接入）按顺序请求各源，取首个可用清单；比对本地 `version`，
+  有更新则拉取对应包并应用（H5 走 Capacitor OTA，Android 提示装 APK），任一源失败自动 fallback。
+- ⚠️ 区分：代码仓库双库 ≠ **照片数据同步**。衣物照片的多设备同步仍按原计划走**坚果云**等网盘，两者是不同层。
+
+## 数据与自动更新
+- MVP 数据存本机（Taro Storage），离线可用，无账号
+- 自动更新：Android 端接 **Capacitor + Capgo**（或自建 OTA）；以 `package.json` 的 `version` 为基线；
+  CI 构建新包推送后，App 启动自动拉取热更新（用户无感）；双源 manifest 提供 CNB/GitHub 冗余下载
 
 ## 目录
 ```

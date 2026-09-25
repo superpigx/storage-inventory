@@ -53,10 +53,14 @@ MVP 聚焦：压缩袋里的衣物管理；架构预留扩展：柜内任意物�
 - **Changelog**：维护 `CHANGELOG.md`（Keep a Changelog 格式）
 - 目录：Taro 约定（src/pages / src/components / src/domain / src/store / config）
 
-## 九、GitHub CI / 自动更新（新增）
-- 托管：GitHub 仓库；本地 `git remote add origin` 后 push 即触发
-- `.github/workflows/ci.yml`：push 到 main → lint + `taro build --type h5` 冒烟
-- `.github/workflows/release.yml`：打 tag（如 v0.1.0）→ `taro build --type android`（Capacitor）→ 上传 APK 到 GitHub Release
-- 自动更新：Android 端接 **Capacitor + Capgo**（或自建 OTA）；以 `package.json` 的 `version` 为基线，CI 构建产物推送后 App 启动自动拉取热更新
-- 小程序更新由微信平台管，不由 GitHub 控制
-- 限制：GitHub Actions 免费额度对个人够用；APK 构建需在 CI 配 Android SDK（runner 脚本装，可行）
+## 九、CI / 双库备份 / 双源自动更新
+- **双库热备**：GitHub（主/备份）+ 腾讯 CNB（国内快、免 GFW，作主构建分发源）。`git remote` 配双 push URL，一次 push 推两家；任一平台出事仍可重建。
+- **CI 双源**：
+  - `.github/workflows/ci.yml`：push 到 main → lint + `build:h5` 冒烟
+  - `.github/workflows/release.yml`：打 `v*` tag → `build:h5` + 打包 + `gen-manifest.js` 生成双源 `manifest.json` + 上传产物（APK 步骤 P4 启用）
+  - `.cnb.yml`（腾讯云原生构建）：push 冒烟 + tag 自动建 CNB Release（`git:release`）+ 上传 `dist-h5.tar.gz`/`manifest.json`（`cnbcool/attachments` 插件）
+- **双源自动更新**：CI 在 tag 时生成 `manifest.json`，含 `version` 与 CNB/GitHub 双份 `androidApk`/`h5Bundle` 下载地址 + `sources` 优先级。App 更新服务（P4）按序请求源、取首个可用、比对版本、fallback 下载；H5 走 Capacitor OTA，Android 提示装 APK。
+- 自动更新底层：Android 接 **Capacitor + Capgo**（或自建 OTA）；以 `package.json` 的 `version` 为基线。
+- 小程序更新由微信平台管，不由 GitHub/CNB 控制。
+- 分层注意：**代码双库 ≠ 照片数据同步**（照片多设备仍走坚果云等网盘）。
+- 限制：GitHub Actions 免费额度够用；CNB 国内快；APK 构建需在 CI 配 Android SDK（runner 脚本装，可行）。

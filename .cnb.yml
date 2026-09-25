@@ -1,0 +1,51 @@
+# 腾讯云原生构建（CNB）配置 —— 与 GitHub Actions 双源镜像
+# 文档: https://docs.cnb.cool/zh/build/configuration.html
+# 触发: push 到 main 做冒烟；打 tag (v*) 做发布（建 Release + 上传附件）
+# 国内访问比 GitHub 快、免 GFW，作为主构建/分发源，GitHub 作备份镜像。
+
+main:
+  push:
+    - docker:
+        image: node:20
+      stages:
+        - name: install
+          script: cd app && npm ci
+        - name: build-h5-smoke
+          script: cd app && npm run build:h5
+
+$:
+  tag_push:
+    - name: release
+      docker:
+        image: node:20
+      stages:
+        - name: install
+          script: cd app && npm ci
+        - name: build-h5
+          script: cd app && npm run build:h5
+        # P4: 接入 Capacitor android 后启用 APK 构建
+        # - name: build-apk
+        #   script: cd app && npx cap sync android && cd android && ./gradlew assembleRelease
+        - name: package-h5
+          script: cd app && tar czf dist-h5.tar.gz dist
+        - name: gen-manifest
+          # 生成双源更新清单 dist/manifest.json（含 CNB + GitHub 下载地址）
+          script: node app/scripts/gen-manifest.js
+        - name: git-release
+          # 为当前 tag 创建 CNB Release（内置任务）
+          type: git:release
+        - name: upload-assets
+          # 将构建产物作为 Release 附件上传
+          image: cnbcool/attachments:latest
+          settings:
+            attachments:
+              - app/dist-h5.tar.gz
+              - app/dist/manifest.json
+              # - app/android/app/build/outputs/apk/release/app-release-unsigned.apk
+      # 若 git:release 在当前 CNB 版本不支持，改用 Release API（取消注释）：
+      # - name: create-release
+      #   script: |
+      #     curl -X POST "${CNB_API_ENDPOINT}/${CNB_REPO_SLUG}/-/releases" \
+      #       -H "Authorization: Bearer ${CNB_TOKEN}" \
+      #       -H "Content-Type: application/json" \
+      #       -d "{\"tag_name\":\"${CNB_BRANCH}\",\"name\":\"${CNB_BRANCH}\"}"

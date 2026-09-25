@@ -32,8 +32,19 @@ jobs:
       #   uses: softprops/action-gh-release@v2
       #   with:
       #     files: app/android/app/build/outputs/apk/release/*.apk
-      - name: Upload H5 bundle
+      - name: Package H5 bundle
+        working-directory: app
+        run: tar czf dist-h5.tar.gz dist
+      - name: Generate update manifest (双源)
+        working-directory: app
+        env:
+          GITHUB_REPO_SLUG: ${{ github.repository }}
+          RELEASE_NOTES: "Automated release"
+        run: node scripts/gen-manifest.js
+      - name: Upload H5 bundle + manifest
         uses: actions/upload-artifact@v4
         with:
-          name: h5-bundle
-          path: app/dist
+          name: release-assets
+          path: |
+            app/dist-h5.tar.gz
+            app/dist/manifest.json
